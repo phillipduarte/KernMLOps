@@ -7,6 +7,7 @@ from typing import Callable
 from data_schema import perf
 from data_schema.block_io import BlockIOLatencyTable, BlockIOQueueTable, BlockIOTable
 from data_schema.file_data import FileDataTable
+from data_schema.file_opening import FileOpeningTable  # New import added here
 from data_schema.generic_table import ProcessMetadataTable
 from data_schema.huge_pages import CollapseHugePageDataTable
 from data_schema.memory_usage import MemoryUsageTable
@@ -33,6 +34,7 @@ table_types: list[type[CollectionTable]] = [
     BlockIOQueueTable,
     BlockIOTable,
     CollapseHugePageDataTable,
+    FileOpeningTable, # New table added here
 ] + list(perf.perf_table_types.values())
 
 def demote(user_id: int | None = None, group_id: int | None = None) -> Callable[[], None]:
