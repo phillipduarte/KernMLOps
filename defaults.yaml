@@ -44,3 +44,4 @@ collector_config:
       - mm_rss_stat
       - process_trace
       - zswap_runtime
+      - file_opening
