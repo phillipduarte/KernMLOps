@@ -12,6 +12,7 @@ from data_schema.generic_table import ProcessMetadataTable
 from data_schema.huge_pages import CollapseHugePageDataTable
 from data_schema.memory_usage import MemoryUsageTable
 from data_schema.quanta_runtime import QuantaQueuedTable, QuantaRuntimeTable
+from data_schema.scheduler_core import SchedulerCoreTable
 from data_schema.schema import (
     UPTIME_TIMESTAMP,
     CollectionData,
@@ -35,6 +36,7 @@ table_types: list[type[CollectionTable]] = [
     BlockIOTable,
     CollapseHugePageDataTable,
     FileOpeningTable, # New table added here
+    SchedulerCoreTable,  # Assuming SchedulerCoreTable is defined in scheduler_core.py
 ] + list(perf.perf_table_types.values())
 
 def demote(user_id: int | None = None, group_id: int | None = None) -> Callable[[], None]:

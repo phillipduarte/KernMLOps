@@ -26,6 +26,9 @@ from data_collection.bpf_instrumentation.process_metadata_hook import (
     ProcessMetadataHook,
 )
 from data_collection.bpf_instrumentation.quanta_runtime_hook import QuantaRuntimeBPFHook
+from data_collection.bpf_instrumentation.scheduler_core import (
+    SchedulerCoreBPFHook,
+)
 from data_collection.bpf_instrumentation.unmap_range import UnmapRangeBPFHook
 from data_collection.bpf_instrumentation.zswap_runtime_hook import ZswapRuntimeBPFHook
 
@@ -44,6 +47,7 @@ all_hooks: Final[Mapping[str, type[BPFProgram]]] = {
     TraceProcessHook.name(): TraceProcessHook,
     ZswapRuntimeBPFHook.name(): ZswapRuntimeBPFHook,
     FileOpeningBPFHook.name(): FileOpeningBPFHook, # New hook added here
+    SchedulerCoreBPFHook.name(): SchedulerCoreBPFHook,  # Assuming SchedulerCoreBPFHook is defined in scheduler_core.py
 }
 
 def hook_names() -> list[str]:
