@@ -21,3 +21,4 @@ collector_config:
       - block_io
       - perf
       - file_opening
+      - scheduler_core
