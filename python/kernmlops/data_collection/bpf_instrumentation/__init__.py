@@ -10,6 +10,9 @@ from data_collection.bpf_instrumentation.cbmm import (
 from data_collection.bpf_instrumentation.collapse_huge_page import (
     CollapseHugePageBPFHook,
 )
+from data_collection.bpf_instrumentation.compound_hook import (
+    CompoundBPFHook,  # Assuming CompoundCoreBPFHook is defined in compound_hook.py
+)
 from data_collection.bpf_instrumentation.file_data_hook import FileDataBPFHook
 
 #Change made here
@@ -48,6 +51,7 @@ all_hooks: Final[Mapping[str, type[BPFProgram]]] = {
     ZswapRuntimeBPFHook.name(): ZswapRuntimeBPFHook,
     FileOpeningBPFHook.name(): FileOpeningBPFHook, # New hook added here
     SchedulerCoreBPFHook.name(): SchedulerCoreBPFHook,  # Assuming SchedulerCoreBPFHook is defined in scheduler_core.py
+    CompoundBPFHook.name(): CompoundBPFHook,  # Assuming CompoundBPFHook is defined in compound_hook.py
 }
 
 def hook_names() -> list[str]:
