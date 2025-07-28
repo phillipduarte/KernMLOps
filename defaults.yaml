@@ -46,3 +46,4 @@ collector_config:
       - zswap_runtime
       - file_opening
       - scheduler_core
+      - compound
