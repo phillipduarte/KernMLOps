@@ -6,6 +6,20 @@ from bcc import BPF
 from data_collection.bpf_instrumentation.bpf_hook import POLL_TIMEOUT_MS, BPFProgram
 from data_schema import CollectionTable, SchedulerCoreTable
 
+# Define constants for event types
+PICK_ENTRY = 0
+PICK_IDLE = 1
+PICK_DONE = 2
+PICK_WHILE_IS_GROUP = 3
+PICK_WHILE_DIFFERENT_GROUPS = 4
+
+EVENT_NAMES = {
+    PICK_ENTRY: "entry",
+    PICK_IDLE: "idle",
+    PICK_DONE: "done",
+    PICK_WHILE_IS_GROUP: "while_is_group",
+    PICK_WHILE_DIFFERENT_GROUPS: "while_different_groups",
+}
 
 @dataclass(frozen=True)
 class SchedulerCoreData:
@@ -37,47 +51,37 @@ class SchedulerCoreBPFHook(BPFProgram):
 
         # Define all kernel events we want to monitor
         kernel_events = [
-            "schedule+0x0",
-            "schedule+0xf62",
-            "schedule+0x5cf",
-            # Add more events as needed
+            ("entry", 0),
+            ("idle", 0x31),
+            ("done", 0x126),
+            ("while_is_group", 0xa4),
+            ("while_different_groups", 0x1d3),
         ]
 
+        event_bpf = self.bpf_text
+        self.bpf = BPF(text=event_bpf)
         # Create a version of the BPF program for each event
-        for event in kernel_events:
-            event_bpf = self.bpf_text.replace('USER_EVENT_NAME', f'"{event}"')
-            event_bpf_program = BPF(text=event_bpf)
-
-            # Store the BPF program in a dictionary
-            if not hasattr(self, 'bpf_programs'):
-                self.bpf_programs = {}
-            self.bpf_programs[event] = event_bpf_program
-
+        for event, offset in kernel_events:
             # Attach the kprobe
-            event_bytes = event.encode()
-            self.bpf_programs[event].attach_kprobe(
-                event=event_bytes,
-                fn_name=b"trace_syscall"
+            self.bpf.attach_kprobe(
+                event="pick_next_task_fair",
+                fn_name=event.encode(),
+                event_off=offset,
             )
 
-            # Set up the perf buffer with a handler that knows its event name
-            self.bpf_programs[event]["scheduler_core_events"].open_perf_buffer(
-                self.create_event_handler(event),
+        # Set up the perf buffer with a handler that knows its event name
+        self.bpf["scheduler_core_events"].open_perf_buffer(
+                self._scheduler_core_event_handler,
                 page_cnt=64
             )
 
-        # Keep a reference to the primary BPF program for the regular methods
-        self.bpf = next(iter(self.bpf_programs.values()))
-
     def poll(self):
         # Poll all BPF programs
-        for event, program in self.bpf_programs.items():
-            program.perf_buffer_poll(timeout=POLL_TIMEOUT_MS)
+        self.bpf.perf_buffer_poll(timeout=POLL_TIMEOUT_MS)
 
     def close(self):
         # Clean up all BPF programs
-        for event, program in self.bpf_programs.items():
-            program.cleanup()
+        self.bpf.cleanup()
 
     def data(self) -> list[CollectionTable]:
         if not self.scheduler_core_data:
@@ -132,31 +136,8 @@ class SchedulerCoreBPFHook(BPFProgram):
                 comm=event.comm.decode('utf-8', errors='replace'),
                 flags=event.flags,
                 mode=event.mode,
-                event_name=event_name
+                event_name=EVENT_NAMES.get(event.event_type, "unknown"),
             )
             self.scheduler_core_data.append(core_data)
         except Exception as e:
             print(f"[ERROR] Scheduler event handler failed: {e}")
-
-    def create_event_handler(self, event_name):
-        """Creates a handler function specific to a particular event"""
-        def handler(cpu, data, size):
-            try:
-                event = self.bpf_programs[event_name]["scheduler_core_events"].event(data)
-                print(f"[DEBUG] {event_name} event received on CPU {cpu}")
-
-                core_data = SchedulerCoreData(
-                    cpu=cpu,
-                    pid=event.pid,
-                    tgid=event.tgid,
-                    ts_uptime_us=event.ts_uptime_us,
-                    comm=event.comm.decode('utf-8', errors='replace'),
-                    flags=event.flags,
-                    mode=event.mode,
-                    event_name=event_name  # Set the event name here in Python
-                )
-                self.scheduler_core_data.append(core_data)
-            except Exception as e:
-                print(f"[ERROR] {event_name} handler failed: {e}")
-
-        return handler
