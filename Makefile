@@ -251,6 +251,44 @@ install-ycsb:
 	@echo "Installing ycsb..."
 	@su ${UNAME} -c "bash scripts/setup-benchmarks/install-ycsb.sh"
 
+install-xsbench:
+	@echo "Installing XSBench..."
+	@su ${UNAME} -c "bash scripts/setup-benchmarks/install-xsbench.sh"
+
+benchmark-xsbench:
+	@python python/kernmlops collect -v \
+		-c ${KERNMLOPS_CONFIG_FILE} \
+		--benchmark xsbench
+
+install-cloudsuite:
+	@echo "Installing Cloudsuite web-serving benchmark…"
+	@su ${UNAME} -c "bash scripts/setup-benchmarks/install-cloudsuite.sh"
+
+benchmark-cloudsuite:
+	@python python/kernmlops collect -v \
+ 		-c ${KERNMLOPS_CONFIG_FILE} \
+ 		--benchmark webserving
+
+install-terasort:
+	@echo "Installing Hadoop Terasort workload…"
+	@bash scripts/setup-benchmarks/install-terasort.sh
+
+benchmark-terasort: install-terasort
+	@echo "Collecting data for terasort…"
+	@python python/kernmlops collect -v \
+	  -c ${KERNMLOPS_CONFIG_FILE} \
+	  --benchmark terasort
+
+install-fio:
+	@echo "Installing Fio workload…"
+	@bash scripts/setup-benchmarks/install-fio.sh
+
+benchmark-fio: install-fio
+	@echo "Collecting data for fio…"
+	@python -m kernmlops collect -v \
+ 	  -c ${KERNMLOPS_CONFIG_FILE} \
+ 	  --benchmark fio
+
 setup-mongodb:
 	@echo "Setting up storage for mongodb benchmark..."
 	@source scripts/setup-benchmarks/setup-mongodb.sh
