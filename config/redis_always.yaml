@@ -7,8 +7,8 @@ benchmark_config:
     transparent_hugepages: always
     overcommit_memory: never_check
   redis:
-    record_count: 1000
-    operation_count: 1000
+    record_count: 1
+    operation_count: 1
     read_proportion: 0.20
     update_proportion: 0.10
     insert_proportion: 0.10
@@ -22,8 +22,4 @@ collector_config:
     output_dir: data
     output_graphs: false
     hooks:
-      - mm_rss_stat
-      - process_trace
-      - madvise
-      - perf
-      - unmap_range
+      - compound

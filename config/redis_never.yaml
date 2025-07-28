@@ -22,8 +22,4 @@ collector_config:
     output_dir: data
     output_graphs: false
     hooks:
-      - mm_rss_stat
-      - process_trace
-      - madvise
-      - unmap_range
-      - perf
+      - compound

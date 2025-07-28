@@ -1,22 +1,18 @@
 ---
 benchmark_config:
   generic:
-    benchmark: faux
+    benchmark: terasort
     cpus: 0
     transparent_hugepages: never
+  terasort:
+    hadoop_version: "3.2.4"
+    num_records: 100
+    input_dir: "terasort-input"
+    output_dir: "terasort-output"
 collector_config:
   generic:
     poll_rate: 0.1
     output_dir: data
     output_graphs: false
     hooks:
-      - process_trace
-      - process_metadata
-      - file_data
-      - memory_usage
-      - quanta_runtime
-      - block_io
-      - perf
-      - file_opening
       - scheduler_core
-      - compound

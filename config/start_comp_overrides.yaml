@@ -7,20 +7,10 @@ benchmark_config:
   redis:
     operation_count: 100
     record_count: 100
-    thread_count: 4
 collector_config:
   generic:
     poll_rate: 0.1
     output_dir: data
     output_graphs: false
     hooks:
-      - process_trace
-      - process_metadata
-      - file_data
-      - memory_usage
-      - quanta_runtime
-      - block_io
-      - perf
-      - file_opening
-      - scheduler_core
       - compound

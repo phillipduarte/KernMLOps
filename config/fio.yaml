@@ -1,0 +1,19 @@
+---
+benchmark_config:
+  generic:
+    benchmark: fio
+  fio:
+    ioengine: "libaio"
+    blocksize: "4k"
+    size: "15G"
+    numjobs: 10
+    filename: "fio-testfile"
+    runtime: 300
+    direct: true
+collector_config:
+  generic:
+    poll_rate: 0.1
+    output_dir: data
+    output_graphs: false
+    hooks:
+      - scheduler_core
